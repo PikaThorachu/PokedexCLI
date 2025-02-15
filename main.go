@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/PikaThorachu/Pokedex/PokedexCLI/internal"
 )
 
 func cleanInput(text string) []string {
@@ -15,13 +17,13 @@ func cleanInput(text string) []string {
 	return splitwords
 }
 
-func commandExit() error {
+func commandExit(c *internal.Config) error {
 	fmt.Printf("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp() error {
+func commandHelp(c *internal.Config) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
 	for command := range commands {
@@ -30,10 +32,32 @@ func commandHelp() error {
 	return nil
 }
 
+func commandMap(c *internal.Config) error {
+	names, err := internal.GetNextLocations(c)
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		fmt.Println(name)
+	}
+	return nil
+}
+
+func commandMapb(c *internal.Config) error {
+	names, err := internal.GetPreviousLocations(c)
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		fmt.Println(name)
+	}
+	return nil
+}
+
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*internal.Config) error
 }
 
 var commands map[string]cliCommand
@@ -50,13 +74,23 @@ func init() {
 			description: "Exit the Pokedex",
 			callback:    commandExit,
 		},
+		"map": {
+			name:        "map",
+			description: "Displays the map",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays previous 20 map items",
+			callback:    commandMapb,
+		},
 	}
 }
 
 func main() {
-
-	bufio.NewScanner(os.Stdin)
+	cfg := &internal.Config{} //initialize this once!
 	scanner := bufio.NewScanner(os.Stdin)
+
 	for {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
@@ -68,12 +102,12 @@ func main() {
 
 		command := words[0]
 		if cmd, ok := commands[command]; ok {
-			err := cmd.callback()
+			err := cmd.callback(cfg)
 			if err != nil {
 				fmt.Println(err)
 			}
 		} else {
-			fmt.Printf("Unknown command\n")
+			fmt.Println("Unknown command")
 		}
 	}
 }
