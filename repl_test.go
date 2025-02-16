@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestClearnInput(t *testing.T) {
+func TestCleanInput(t *testing.T) {
 	cases := []struct {
 		input    string
 		expected []string

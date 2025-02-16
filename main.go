@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
-	"github.com/PikaThorachu/Pokedex/PokedexCLI/internal"
+	"github.com/PikaThorachu/Pokedex/PokedexCLI/internal/PokeCache"
+	PokeDex_API "github.com/PikaThorachu/Pokedex/PokedexCLI/internal/Pokedex_API"
 )
 
 func cleanInput(text string) []string {
@@ -17,13 +19,13 @@ func cleanInput(text string) []string {
 	return splitwords
 }
 
-func commandExit(c *internal.Config) error {
+func commandExit(cfg *PokeDex_API.Config) error {
 	fmt.Printf("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(c *internal.Config) error {
+func commandHelp(cfg *PokeDex_API.Config) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
 	for command := range commands {
@@ -32,8 +34,8 @@ func commandHelp(c *internal.Config) error {
 	return nil
 }
 
-func commandMap(c *internal.Config) error {
-	names, err := internal.GetNextLocations(c)
+func commandMap(cfg *PokeDex_API.Config) error {
+	names, err := PokeDex_API.GetNextLocations(cfg)
 	if err != nil {
 		return err
 	}
@@ -43,8 +45,8 @@ func commandMap(c *internal.Config) error {
 	return nil
 }
 
-func commandMapb(c *internal.Config) error {
-	names, err := internal.GetPreviousLocations(c)
+func commandMapb(cfg *PokeDex_API.Config) error {
+	names, err := PokeDex_API.GetPreviousLocations(cfg)
 	if err != nil {
 		return err
 	}
@@ -57,7 +59,7 @@ func commandMapb(c *internal.Config) error {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*internal.Config) error
+	callback    func(*PokeDex_API.Config) error
 }
 
 var commands map[string]cliCommand
@@ -88,7 +90,10 @@ func init() {
 }
 
 func main() {
-	cfg := &internal.Config{} //initialize this once!
+	cfg := &PokeDex_API.Config{
+		Cache: PokeCache.NewCache(10 * time.Second),
+	} //initialize this once!
+	fmt.Printf("Initial config: %+v\n", cfg)
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
