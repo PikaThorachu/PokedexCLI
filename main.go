@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PikaThorachu/Pokedex/PokedexCLI/internal/PokeCache"
+	PokeCache "github.com/PikaThorachu/Pokedex/PokedexCLI/internal/PokeCache"
 	PokeDex_API "github.com/PikaThorachu/Pokedex/PokedexCLI/internal/Pokedex_API"
 )
 
@@ -19,13 +19,13 @@ func cleanInput(text string) []string {
 	return splitwords
 }
 
-func commandExit(cfg *PokeDex_API.Config) error {
+func commandExit(cfg *PokeDex_API.Config, loc string) error {
 	fmt.Printf("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(cfg *PokeDex_API.Config) error {
+func commandHelp(cfg *PokeDex_API.Config, loc string) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
 	for command := range commands {
@@ -34,7 +34,7 @@ func commandHelp(cfg *PokeDex_API.Config) error {
 	return nil
 }
 
-func commandMap(cfg *PokeDex_API.Config) error {
+func commandMap(cfg *PokeDex_API.Config, loc string) error {
 	names, err := PokeDex_API.GetNextLocations(cfg)
 	if err != nil {
 		return err
@@ -45,7 +45,7 @@ func commandMap(cfg *PokeDex_API.Config) error {
 	return nil
 }
 
-func commandMapb(cfg *PokeDex_API.Config) error {
+func commandMapb(cfg *PokeDex_API.Config, loc string) error {
 	names, err := PokeDex_API.GetPreviousLocations(cfg)
 	if err != nil {
 		return err
@@ -56,10 +56,23 @@ func commandMapb(cfg *PokeDex_API.Config) error {
 	return nil
 }
 
+func commandExplore(cfg *PokeDex_API.Config, loc string) error {
+	pokemonNames, err := PokeDex_API.GetPokemon(cfg, loc)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Exploring %s...\n", loc)
+	fmt.Println("Found Pokemon:")
+	for _, pokemonName := range pokemonNames {
+		fmt.Println("-" + pokemonName)
+	}
+	return nil
+}
+
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*PokeDex_API.Config) error
+	callback    func(*PokeDex_API.Config, string) error
 }
 
 var commands map[string]cliCommand
@@ -86,6 +99,11 @@ func init() {
 			description: "Displays previous 20 map items",
 			callback:    commandMapb,
 		},
+		"explore": {
+			name:        "explore <location>",
+			description: "Explore the location",
+			callback:    commandExplore,
+		},
 	}
 }
 
@@ -106,8 +124,12 @@ func main() {
 		}
 
 		command := words[0]
+		argument := ""
+		if len(words) > 1 {
+			argument = words[1]
+		}
 		if cmd, ok := commands[command]; ok {
-			err := cmd.callback(cfg)
+			err := cmd.callback(cfg, argument)
 			if err != nil {
 				fmt.Println(err)
 			}
