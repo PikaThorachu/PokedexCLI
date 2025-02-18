@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -69,6 +70,32 @@ func commandExplore(cfg *PokeDex_API.Config, loc string) error {
 	return nil
 }
 
+func commandCatch(cfg *PokeDex_API.Config, pokemon string) error {
+	// Check if the Pokémon is already in the Pokedex
+	for _, p := range cfg.Pokedex {
+		if p == pokemon {
+			fmt.Printf("You already caught %s!\n", pokemon)
+			return nil
+		}
+	}
+
+	// Fetch data about the Pokemon from cache or API
+	exp, err := PokeDex_API.CatchPokemon(cfg, pokemon)
+	if err != nil {
+		return err
+	}
+
+	// Simulate throwing the pokeball
+	fmt.Printf("Throwing a Pokeball at %s...\n", pokemon)
+	if rand.Intn(400) > exp {
+		fmt.Printf("%s escaped!\n", pokemon)
+	} else {
+		cfg.Pokedex = append(cfg.Pokedex, pokemon) //Add Pokemon to the Pokedex upon success
+		fmt.Printf("%s was caught!\n", pokemon)
+	}
+	return nil
+}
+
 type cliCommand struct {
 	name        string
 	description string
@@ -103,6 +130,11 @@ func init() {
 			name:        "explore <location>",
 			description: "Explore the location",
 			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch <pokemon>",
+			description: "Catch the pokemon",
+			callback:    commandCatch,
 		},
 	}
 }
