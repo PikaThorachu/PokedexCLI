@@ -100,18 +100,18 @@ func commandCatch(cfg *PokeDex_API.Config, pokemon string) error {
 func commandInspect(cfg *PokeDex_API.Config, pokemon string) error {
 	// Step 1: Check Pokedex for selected pokemon
 	if !slices.Contains(cfg.Pokedex, pokemon) {
-		return fmt.Errorf("you have not caught %s", pokemon) // If not in Pokedex, return empty PR struct & error message
+		return fmt.Errorf("you have not caught %s", pokemon) // If not in Pokedex, error message
 	} else {
 		response, err := PokeDex_API.InspectPokemon(cfg, pokemon)
 		if err != nil {
 			return err
 		} else {
 			fmt.Printf("Name:  %s\n", pokemon)
-			fmt.Printf("Height:  %d\n", response.Weight)
+			fmt.Printf("Height:  %d\n", response.Height)
 			fmt.Printf("Weight:  %d\n", response.Weight)
 			fmt.Printf("Stats:\n")
 			for _, stat := range response.Stats {
-				fmt.Printf("\t-%s: %v\n", stat.Name, stat.BaseStat)
+				fmt.Printf("  -%s: %v\n", stat.Stat.Name, stat.BaseStat)
 			}
 			fmt.Printf("Types:\n")
 			for _, typeInfo := range response.Types {
