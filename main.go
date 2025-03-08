@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -96,6 +97,38 @@ func commandCatch(cfg *PokeDex_API.Config, pokemon string) error {
 	return nil
 }
 
+func commandInspect(cfg *PokeDex_API.Config, pokemon string) error {
+	// Step 1: Check Pokedex for selected pokemon
+	if !slices.Contains(cfg.Pokedex, pokemon) {
+		return fmt.Errorf("you have not caught %s", pokemon) // If not in Pokedex, return empty PR struct & error message
+	} else {
+		response, err := PokeDex_API.InspectPokemon(cfg, pokemon)
+		if err != nil {
+			return err
+		} else {
+			fmt.Printf("Name:  %s\n", pokemon)
+			fmt.Printf("Height:  %d\n", response.Weight)
+			fmt.Printf("Weight:  %d\n", response.Weight)
+			fmt.Printf("Stats:\n")
+			for _, stat := range response.Stats {
+				fmt.Printf("\t-%s: %v\n", stat.Name, stat.BaseStat)
+			}
+			fmt.Printf("Types:\n")
+			for _, typeInfo := range response.Types {
+				fmt.Println("  -", typeInfo.Type.Name)
+			}
+		}
+		return nil
+	}
+}
+
+func commandPokedex(cfg *PokeDex_API.Config, loc string) error {
+	for _, pokemon := range cfg.Pokedex {
+		fmt.Println(pokemon)
+	}
+	return nil
+}
+
 type cliCommand struct {
 	name        string
 	description string
@@ -135,6 +168,16 @@ func init() {
 			name:        "catch <pokemon>",
 			description: "Catch the pokemon",
 			callback:    commandCatch,
+		},
+		"inspect": {
+			name:        "inspect <pokemon>",
+			description: "Inspect the pokemon",
+			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Display all pokemon in pokedex",
+			callback:    commandPokedex,
 		},
 	}
 }
