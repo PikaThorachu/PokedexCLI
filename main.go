@@ -111,11 +111,11 @@ func commandInspect(cfg *PokeDex_API.Config, pokemon string) error {
 			fmt.Printf("Weight:  %d\n", response.Weight)
 			fmt.Printf("Stats:\n")
 			for _, stat := range response.Stats {
-				fmt.Printf("  -%s: %v\n", stat.Stat.Name, stat.BaseStat)
+				fmt.Printf("  - %s: %v\n", stat.Stat.Name, stat.BaseStat)
 			}
 			fmt.Printf("Types:\n")
 			for _, typeInfo := range response.Types {
-				fmt.Println("  -", typeInfo.Type.Name)
+				fmt.Println("  - ", typeInfo.Type.Name)
 			}
 		}
 		return nil
