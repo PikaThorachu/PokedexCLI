@@ -124,7 +124,7 @@ func commandInspect(cfg *PokeDex_API.Config, pokemon string) error {
 
 func commandPokedex(cfg *PokeDex_API.Config, loc string) error {
 	for _, pokemon := range cfg.Pokedex {
-		fmt.Println(pokemon)
+		fmt.Println(" - ", pokemon)
 	}
 	return nil
 }
